@@ -112,13 +112,13 @@ class Pohoda:
         def _getattr_resolver(*args: Any) -> Any:
             match_create = re.match(r'^create_([a-zA-Z0-9]*)$', name)
             if match_create:
-                return getattr(self, 'create')(match_create.group(1).capitalize(), args[0])
+                return getattr(self, 'create')(match_create.group(1), args[0])
 
             match_load = re.match(r'^load_([a-zA-Z0-9]*)$', name)
             if match_load:
                 if not args[0]:
                     raise ValueError('Filename is not set')
-                return getattr(self, 'create')(match_load.group(1).capitalize(), args[0])
+                return getattr(self, 'create')(match_load.group(1), args[0])
 
             raise ValueError('Unknown method: {}'.format(name))
 

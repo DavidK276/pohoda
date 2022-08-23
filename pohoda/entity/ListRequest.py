@@ -7,6 +7,11 @@ from pohoda.entity.list_request.UserFilterName import UserFilterName
 
 class ListRequest(Agenda):
 
+    def __init__(self, data: dict, ico: str):
+        super().__init__(data, ico)
+        if 'type' in data.keys() and data['type'] == 'Stock':
+            self._data['namespace'] = 'lStk'
+
     def add_filter(self, data: dict) -> 'ListRequest':
         """
         Add filter.
