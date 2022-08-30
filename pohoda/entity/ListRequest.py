@@ -9,8 +9,13 @@ class ListRequest(Agenda):
 
     def __init__(self, data: dict, ico: str):
         super().__init__(data, ico)
-        if 'type' in data.keys() and data['type'] == 'Stock':
-            self._data['namespace'] = 'lStk'
+        match data.get('type'):
+            case 'Stock':
+                self._data['namespace'] = 'lStk'
+            case 'Order':
+                self._data['namespace'] = 'lst'
+            case _:
+                pass
 
     def add_filter(self, data: dict) -> 'ListRequest':
         """
