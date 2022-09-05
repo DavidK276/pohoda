@@ -14,9 +14,12 @@ class ListRequest(Agenda):
             case 'Stock':
                 self._data['namespace'] = 'lStk'
             case 'Order':
+                ord_type = data.get('orderType')
+                if ord_type != 'issuedOrder' and ord_type != 'receivedOrder':
+                    raise ValueError('Value of orderType must be "receivedOrder" or "isuedOrder"')
                 self._data['namespace'] = 'lst'
-            case _:
-                pass
+            case other:
+                raise NotImplementedError(f'List{other}Request is not implemented yet')
 
     def add_filter(self, data: dict) -> 'ListRequest':
         """
