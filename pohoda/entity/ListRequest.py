@@ -9,6 +9,7 @@ class ListRequest(Agenda):
 
     def __init__(self, data: dict, ico: str):
         super().__init__(data, ico)
+        self._data['filters'] = list()
         match data.get('type'):
             case 'Stock':
                 self._data['namespace'] = 'lStk'
@@ -24,7 +25,8 @@ class ListRequest(Agenda):
         :return:
         """
 
-        self._data['filter'] = Filter(data, self._ico)
+        # self._data['filter'] = Filter(data, self._ico)
+        self._data['filters'].append(Filter(data, self._ico))
         return self
 
     def add_user_filter_name(self, name: str) -> 'ListRequest':
@@ -53,9 +55,11 @@ class ListRequest(Agenda):
         if first_type:
             xml.set(self._get_lc_first_type() + 'Type', first_type)
 
-        request = self._create_xml_tag('request{}'.format(self._data['type']), namespace=self._data['namespace'])
-        xml.append(request)
-        self._add_elements(request, ['filter', 'userFilterName'], 'ftr')
+        for filter in self._data['filters']:
+            request = self._create_xml_tag('request{}'.format(self._data['type']), namespace=self._data['namespace'])
+            xml.append(request)
+            self._data['filter'] = filter
+            self._add_elements(request, ['filter', 'userFilterName'], 'ftr')
         return xml
 
     def _get_lc_first_type(self) -> str:
