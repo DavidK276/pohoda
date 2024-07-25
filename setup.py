@@ -3,11 +3,15 @@ from setuptools import setup, find_packages
 
 setup(
     name='pohoda',
-    version='1.0.12',
+    version='1.19.0',
     packages=find_packages(exclude=['tests', 'tests.*']),
     package_data={'pohoda': ['py.typed']},
     install_requires=[
-        'lxml'
+        'lxml~=4.9.2',
+        'pyhumps'
+    ],
+    tests_require=[
+        'tox'
     ],
     url='https://github.com/Salamek/pohoda',
     license='LGPL-3.0 ',

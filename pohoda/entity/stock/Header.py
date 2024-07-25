@@ -6,19 +6,35 @@ from pohoda.entity.common.AddParameterTrait import AddParameterTrait
 from pohoda.entity.stock.Category import Category
 from pohoda.entity.stock.IntParameter import IntParameter
 from pohoda.entity.stock.Picture import Picture
+from pohoda.entity.stock.Intrastat import Intrastat
+from pohoda.entity.stock.RecyclingContrib import RecyclingContrib
 
 
 class Header(Agenda, AddParameterTrait):
-    _ref_elements = ['storage', 'typePrice', 'typeRP', 'supplier']
-    _elements_attributes_mapper = {'purchasingPricePayVAT': ['purchasingPrice', 'payVAT'],
-                                   'sellingPricePayVAT': ['sellingPrice', 'payVAT']}
+    _ref_elements = ['storage', 'typePrice', 'typeRP', 'supplier', 'typeServiceMOSS']
+    _elements_attributes_mapper = {
+        'purchasingPricePayVAT': ('purchasingPrice', 'payVAT', None),
+        'sellingPricePayVAT': ('sellingPrice', 'payVAT', None)
+    }
     _elements = ['stockType', 'code', 'EAN', 'PLU', 'isSales', 'isSerialNumber', 'isInternet', 'isBatch',
                  'purchasingRateVAT', 'sellingRateVAT', 'name', 'nameComplement', 'unit', 'unit2', 'unit3',
                  'coefficient2', 'coefficient3', 'storage', 'typePrice', 'purchasingPrice', 'purchasingPricePayVAT',
                  'sellingPrice', 'sellingPricePayVAT', 'limitMin', 'limitMax', 'mass', 'volume', 'supplier',
-                 'orderName', 'orderQuantity', 'shortName', 'typeRP', 'guaranteeType', 'guarantee', 'producer',
-                 'description', 'description2', 'note']
+                 'orderName', 'orderQuantity', 'shortName', 'typeRP', 'guaranteeType', 'guarantee', 'producer', 'typeServiceMOSS',
+                 'description', 'description2', 'note', 'intrastat', 'recyclingContrib']
     _images_counter = 0
+
+    def __init__(self, data: dict, ico: str):
+        if 'stockType' not in data:
+            data['stockType'] = 'card'
+
+        if 'intrastat' in data:
+            data['intrastat'] = Intrastat(data['intrastat'], ico)
+
+        if 'recyclingContrib' in data:
+            data['recyclingContrib'] = RecyclingContrib(data['recyclingContrib'], ico)
+
+        super().__init__(data, ico)
 
     def add_image(self,
                   filepath: str,

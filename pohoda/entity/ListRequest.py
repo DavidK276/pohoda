@@ -8,18 +8,32 @@ from pohoda.entity.list_request.UserFilterName import UserFilterName
 class ListRequest(Agenda):
 
     def __init__(self, data: dict, ico: str):
+
+        if 'type' not in data:
+            raise ValueError('"type" argument is required')
+
+        data['type'] = {
+            'Addressbook': 'AddressBook',
+            'IssueSlip': 'Vydejka'
+        }.get(data['type'], data['type'])
+
+        if 'namespace' not in data:
+            data['namespace'] = {
+                'Stock': 'lStk',
+                'AddressBook': 'lAdb'
+            }.get(data['type'], 'lst')
+
+        if 'orderType' not in data:
+            data['orderType'] = {
+                'Order': 'receivedOrder'
+            }.get(data['type'])
+
+        if 'invoiceType' not in data:
+            data['invoiceType'] = {
+                'Invoice': 'issuedInvoice'
+            }.get(data['type'])
+
         super().__init__(data, ico)
-        self._data['filters'] = list()
-        match data.get('type'):
-            case 'Stock':
-                self._data['namespace'] = 'lStk'
-            case 'Order':
-                ord_type = data.get('orderType')
-                if ord_type != 'issuedOrder' and ord_type != 'receivedOrder':
-                    raise ValueError('Value of orderType must be "receivedOrder" or "isuedOrder"')
-                self._data['namespace'] = 'lst'
-            case other:
-                raise NotImplementedError(f'List{other}Request is not implemented yet')
 
     def add_filter(self, data: dict) -> 'ListRequest':
         """
@@ -28,7 +42,8 @@ class ListRequest(Agenda):
         :return:
         """
 
-        # self._data['filter'] = Filter(data, self._ico)
+        if 'filters' not in self._data:
+            self._data['filters'] = []
         self._data['filters'].append(Filter(data, self._ico))
         return self
 
@@ -43,6 +58,16 @@ class ListRequest(Agenda):
         return self
 
     def get_xml(self) -> etree.Element:
+        # UserList is custom
+        if self._data['type'] == 'UserList':
+            # Custom export for UserList
+            xml = self._create_xml_tag(
+                'listUserCodeRequest',
+                namespace=self._data['namespace']
+            )
+            xml.set('version', '1.1')
+            xml.set('listVersion', '1.1')
+            return xml
 
         xml = self._create_xml_tag(
             'list{}Request'.format(self._data['type']),

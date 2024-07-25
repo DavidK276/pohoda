@@ -1,8 +1,25 @@
 import pytest
+import datetime
 from lxml import etree
 
 from pohoda.entity.Agenda import Agenda
 from pohoda.entity.Invoice import Invoice
+
+
+default_header = b"""
+    <inv:invoiceType>issuedInvoice</inv:invoiceType>
+    <inv:date>2015-01-10</inv:date>
+    <inv:partnerIdentity>
+      <typ:id xmlns:typ="http://www.stormware.cz/schema/version_2/type.xsd">25</typ:id>
+    </inv:partnerIdentity>
+    <inv:myIdentity>
+      <typ:address xmlns:typ="http://www.stormware.cz/schema/version_2/type.xsd">
+        <typ:name>NAME</typ:name>
+        <typ:ico>123</typ:ico>
+      </typ:address>
+    </inv:myIdentity>
+    <inv:intNote>Note</inv:intNote>
+  """
 
 
 @pytest.fixture(scope="function")  # type: ignore
@@ -17,7 +34,7 @@ def invoice() -> Invoice:
                 'ico': '123'
             }
         },
-        'date': '2015-01-10',
+        'date': datetime.date(year=2015, month=1, day=10),
         'intNote': 'Note'
     }, '123')
 
@@ -33,7 +50,7 @@ def test_be_constructed_with() -> None:
                 'ico': '123'
             }
         },
-        'date': '2015-01-10',
+        'date': datetime.date(year=2015, month=1, day=10),
         'intNote': 'Note'
     }, '123')
 
@@ -172,10 +189,12 @@ def test_can_add_advance_payment_item(invoice: Invoice) -> None:
         <typ:number xmlns:typ="http://www.stormware.cz/schema/version_2/type.xsd">150800001</typ:number>
       </inv:sourceDocument>
       <inv:quantity>1</inv:quantity>
+      <inv:payVAT>false</inv:payVAT>
       <inv:rateVAT>none</inv:rateVAT>
       <inv:homeCurrency>
         <typ:unitPrice xmlns:typ="http://www.stormware.cz/schema/version_2/type.xsd">-3000</typ:unitPrice>
         <typ:price xmlns:typ="http://www.stormware.cz/schema/version_2/type.xsd">-3000</typ:price>
+        <typ:priceVAT xmlns:typ="http://www.stormware.cz/schema/version_2/type.xsd">0</typ:priceVAT>
         <typ:priceSum xmlns:typ="http://www.stormware.cz/schema/version_2/type.xsd">-3000</typ:priceSum>
       </inv:homeCurrency>
     </inv:invoiceAdvancePaymentItem>
@@ -291,7 +310,7 @@ def test_can_link_to_order(invoice: Invoice) -> None:
     invoice.add_link({
         'sourceAgenda': 'receivedOrder',
         'sourceDocument': {
-            'number': 'number'
+            'number': '142100003'
         }
     })
 
@@ -300,24 +319,11 @@ def test_can_link_to_order(invoice: Invoice) -> None:
     <typ:link xmlns:typ="http://www.stormware.cz/schema/version_2/type.xsd">
       <typ:sourceAgenda>receivedOrder</typ:sourceAgenda>
       <typ:sourceDocument>
-        <typ:number>number</typ:number>
+        <typ:number>142100003</typ:number>
       </typ:sourceDocument>
     </typ:link>
   </inv:links>
-  <inv:invoiceHeader>
-    <inv:invoiceType>issuedInvoice</inv:invoiceType>
-    <inv:date>2015-01-10</inv:date>
-    <inv:partnerIdentity>
-      <typ:id xmlns:typ="http://www.stormware.cz/schema/version_2/type.xsd">25</typ:id>
-    </inv:partnerIdentity>
-    <inv:myIdentity>
-      <typ:address xmlns:typ="http://www.stormware.cz/schema/version_2/type.xsd">
-        <typ:name>NAME</typ:name>
-        <typ:ico>123</typ:ico>
-      </typ:address>
-    </inv:myIdentity>
-    <inv:intNote>Note</inv:intNote>
-  </inv:invoiceHeader>
+  <inv:invoiceHeader>""" + default_header + b"""</inv:invoiceHeader>
 </inv:invoice>
 """
 
